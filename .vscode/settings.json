@@ -1,7 +1,14 @@
 {
     "files.associations": {
         "*.mdx": "markdown",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "vector": "cpp",
+        "string": "cpp",
+        "*.ipp": "cpp",
+        "deque": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "list": "cpp"
     },
     "editor.tabSize": 2,
     "editor.insertSpaces": true

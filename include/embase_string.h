@@ -2,6 +2,7 @@
 
 #include "embase_def.h"
 #include "etl/string.h"
+#include "etl/multi_vector.h"
 #include <cstdarg>
 #include <stdio.h>
 
@@ -36,8 +37,32 @@ BOOL __string_endwith(etl::istring& src, const char *val) {
   return etl::string_view(src).ends_with(val) ? TRUE : FALSE;
 }
 
-
-
-// std::vector<std::string> __string_split(const std::string &string, const std::string &delim);
+// 错误时返回空的vector
+template<const size_t N_>
+etl::vector<etl::string_view, N_> __string_split(const etl::string_view &string, const char *delim)
+{
+  etl::vector<etl::string_view, N_> res;
+  size_t from = 0, to = 0;
+  size_t delim_len = strlen(delim);
+  size_t cnt = 0;
+  while (etl::istring::npos != (to = string.find(delim, from))) {
+    if (++cnt + 1 > N_) {
+      goto error;
+    }
+    res.push_back(string.substr(from, to-from));
+    from = to + delim_len;
+  }
+  res.push_back(string.substr(from, to-from));
+  return res;
+error:
+  res.clear();
+  return res;
+}
+template<const size_t N_>
+etl::vector<etl::string_view, N_> __string_split(const etl::istring &string, const char *delim)
+{
+  const etl::string_view view(string);
+  return __string_split(view, delim);
+}
 
 }
