@@ -2,8 +2,7 @@
 
 #include "embase_def.h"
 
-using namespace Embase;
-
+namespace Embase{
 
 #if EMBASE_TARGET_PLATFORM == EMBASE_PLATFORM_WIN32
 
@@ -17,7 +16,6 @@ typedef pthread_t thread_t;
 typedef pthread_cond_t cond_t;
 typedef pthread_mutex_t mutex_t;
 
-
 #endif
 
 template <typename TYPE, void (TYPE::*run)() >
@@ -28,14 +26,14 @@ void* _thread_t(void* param)//线程启动函数，声明为模板函数
   return NULL;
 }
 
-class EmbaseThread{
+class Thread{
 protected:
   mutex_t _mutex;
   cond_t _cond;
   thread_t _thread;
 public:
-  EmbaseThread();
-  ~EmbaseThread();
+  Thread();
+  ~Thread();
   virtual void run();
   int cancel();
   void join();
@@ -47,3 +45,4 @@ public:
   void broadcast();
   BOOL start();
 };
+}

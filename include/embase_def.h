@@ -42,9 +42,9 @@ typedef float FLOAT;
 
 typedef unsigned int mseconds_t;
 
-INTERFACES EmbaseObject{
+class Object {
 public :
-  EmbaseObject(){}
+  Object(){}
   etl::string<EMBASE_OBJECT_NAME_MAXSIZE> name;
 };
 

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-class MyThread : public EmbaseThread {
+using namespace Embase;
+
+class MyThread : public Embase::Thread {
 public:
   BOOL init() {
     _cnt = 0;
