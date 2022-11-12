@@ -1,0 +1,5 @@
+#pragma once
+
+#ifndef EMBASE_OBJECT_NAME_MAXSIZE
+#define EMBASE_OBJECT_NAME_MAXSIZE    16
+#endif

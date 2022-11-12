@@ -1,11 +1,31 @@
 #pragma once
 
+#include "embase_config.h"
+
 #include <cstdint>
 #include "etl/string.h"
 
 #ifndef INTERFACES
 #define INTERFACES struct
 #endif
+
+
+#define EMBASE_PLATFORM_UNKOWN               0
+#define EMBASE_PLATFORM_LINUX                1
+#define EMBASE_PLATFORM_MAC                  2
+#define EMBASE_PLATFORM_WIN32                3
+#define EMBASE_PLATFORM_BAREMETAL            4
+
+#define EMBASE_ARCH_UNKOWN                   0
+#define EMBASE_ARCH_X86_64                   1
+#define EMBASE_ARCH_ARM                      2
+#define EMBASE_ARCH_ARM64                    3
+
+namespace Embase {
+
+typedef bool BOOL;
+#define FALSE    0
+#define TRUE     (!FALSE)
 
 typedef std::int8_t INT8;
 typedef std::int16_t INT16;
@@ -25,7 +45,8 @@ typedef unsigned int mseconds_t;
 INTERFACES EmbaseObject{
 public :
   EmbaseObject(){}
-  etl::string<16> name;
+  etl::string<EMBASE_OBJECT_NAME_MAXSIZE> name;
 };
 
+}
 
