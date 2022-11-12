@@ -1,5 +1,7 @@
 {
     "files.associations": {
+        "*.mdx": "markdown",
+        "string_view": "cpp"
     },
     "editor.tabSize": 2,
     "editor.insertSpaces": true
