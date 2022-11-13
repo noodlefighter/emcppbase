@@ -58,11 +58,5 @@ error:
   res.clear();
   return res;
 }
-template<const size_t N_>
-etl::vector<etl::string_view, N_> __string_split(const etl::istring &string, const char *delim)
-{
-  const etl::string_view view(string);
-  return __string_split(view, delim);
-}
 
 }
