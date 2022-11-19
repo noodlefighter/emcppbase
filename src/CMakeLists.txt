@@ -29,13 +29,6 @@ set(EMBASE_SRC
 set(EMBASE_LINKS ${EMBASE_LINKS} etl::etl)
 endif()
 
-
-
-if(${EMBASE_TARGET_PLATFORM} MATCHES 2)
-  include_directories(/opt/homebrew/include)
-  link_directories(/opt/homebrew/lib)
-endif()
-
 message("EMBASE_TARGET_LOGGER is: ${EMBASE_TARGET_LOGGER}")
 if(${EMBASE_TARGET_LOGGER} MATCHES 1)
 message("USE: EMBASE_STDOUT_LOGGER")
@@ -50,4 +43,5 @@ endif()
 # endif()
 
 add_library(embase ${EMBASE_SRC})
+target_include_directories(embase PUBLIC ${EMBASE_ROOT}/include ${EMBASE_ROOT}/src)
 target_link_libraries(embase PUBLIC ${EMBASE_LINKS})

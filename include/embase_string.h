@@ -6,7 +6,7 @@
 #include <cstdarg>
 #include <stdio.h>
 
-namespace Embase {
+namespace embase {
 
 template<const size_t MAX_SIZE_>
 etl::string<MAX_SIZE_> __string_format(const char* format, ...)

@@ -19,8 +19,6 @@ endif()
 
 configure_file(${EMBASE_ROOT}/include/embase_config.h.in ${EMBASE_ROOT}/include/embase_config.h)
 
-include_directories(${EMBASE_ROOT}/include ${EMBASE_ROOT}/src)
-
 add_subdirectory(${EMBASE_ROOT}/libs/etl EXCLUDE_FROM_ALL)
 
 add_subdirectory(${EMBASE_ROOT}/src EXCLUDE_FROM_ALL)

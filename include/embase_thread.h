@@ -2,7 +2,7 @@
 
 #include "embase_def.h"
 
-namespace Embase{
+namespace embase{
 
 #if EMBASE_TARGET_PLATFORM == EMBASE_PLATFORM_WIN32
 

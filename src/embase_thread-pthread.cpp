@@ -2,7 +2,7 @@
 #include "embase_log.h"
 #include <unistd.h>
 
-using namespace Embase;
+using namespace embase;
 
 Thread::Thread()
 {
