@@ -4,10 +4,7 @@
 
 namespace embase{
 
-#if EMBASE_TARGET_PLATFORM == EMBASE_PLATFORM_WIN32
-
-
-#elif EMBASE_TARGET_PLATFORM == EMBASE_PLATFORM_BAREMETAL
+#if EMBASE_OS == EMBASE_OS_WIN32
 
 #else
 #include <pthread.h>

@@ -1,4 +1,4 @@
-#include "Screen.h"
+#include "hw/Screen.h"
 #include "embase_macros.h"
 #include "embase_macros_bits.h"
 
@@ -8,6 +8,12 @@ BOOL Screen::init(int sizeX, int sizeY, PixelFormat pixFmt) {
   _sizeX = sizeX;
   _sizeY = sizeY;
   _pixFmt = pixFmt;
+  return TRUE;
+}
+
+BOOL Screen::setBacklight(int level)
+{
+  return FALSE;
 }
 
 Screen::PixelFormat Screen::getPixelFormat()
@@ -27,24 +33,26 @@ BOOL Screen::fillGradient(BYTE *buf, int xSize, int ySize, PixelFormat fmt, int 
 {
   int ofst = 0;
   for (int y = 0; y < ySize; y++) {
-    uint8_t r = rMax*y/ySize;
-    uint8_t g = gMax*y/ySize;
-    uint8_t b = bMax*y/ySize;
+    int r = rMax*y/ySize;
+    int g = gMax*y/ySize;
+    int b = bMax*y/ySize;
     for (int x = 0; x < xSize; x++) {
-      getPixel(fmt, r, g, b, &buf[ofst++]);
+      ofst += getPixel(fmt, r, g, b, &buf[ofst]);
     }
   }
   return TRUE;
 }
 
-BOOL Screen::getPixel(PixelFormat fmt, UINT8 r, UINT8 g, UINT8 b, BYTE *buf)
+int Screen::getPixel(PixelFormat fmt, int r, int g, int b, BYTE *buf)
 {
   switch (fmt) {
   case PixelFormat::RGB565:
-    return (((uint16_t)r >> 3) << 11) | (((uint16_t)g >> 2) << 5 ) | (((uint16_t)b >> 3) << 0);
+    SET_U16_LSBFIRST(buf, (((uint16_t)r >> 3) << 11) | (((uint16_t)g >> 2) << 5 ) | (((uint16_t)b >> 3) << 0));
+    return 2;
   case PixelFormat::RGB565_SWAP:
-    return SWAP_U16((((uint16_t)r >> 3) << 11) | (((uint16_t)g >> 2) << 5 ) | (((uint16_t)b >> 3) << 0));
+    SET_U16_LSBFIRST(buf, SWAP_U16((((uint16_t)r >> 3) << 11) | (((uint16_t)g >> 2) << 5 ) | (((uint16_t)b >> 3) << 0)));
+    return 2;
   default:
-    return FALSE;
+    return 0;
   }
 }

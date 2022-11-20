@@ -18,7 +18,6 @@ private:
   void _reg16(UINT8 index, uint16_t data);
   void _setXY(UINT32 x, UINT32 y);
   void _setRegion(UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2);
-  void _drawRegion(UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2, const UINT8 *buf, size_t size);
 };
 
 } // namespace embase

@@ -27,7 +27,7 @@ public:
   virtual BOOL drawRegion(const Rectangle_t &region, const IBuffer_t &buff) = 0;
 
 
-  static BOOL getPixel(PixelFormat fmt, UINT8 r, UINT8 g, UINT8 b, BYTE *buf);
+  static int getPixel(PixelFormat fmt, int r, int g, int b, BYTE *buf);
   static BOOL fillGradient(BYTE *buf, int xSize, int ySize, PixelFormat fmt,
                            int rMax, int gMax, int bMax);
 

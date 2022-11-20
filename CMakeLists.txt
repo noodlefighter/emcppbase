@@ -9,23 +9,50 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 set(EMBASE_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
-option(EMBASE_EXAMPLES "Configure CMake to build examples (or not)" ON)
+option(EMBASE_EXAMPLES "Configure CMake to build examples (or not)" OFF)
 
 if(NOT DEFINED EMBASE_TARGET_LOGGER)
 message("Set EMBASE_TARGET_LOGGER info default[1]")
 set(EMBASE_TARGET_LOGGER 1)
 endif()
 
+message("CMAKE_HOST_SYSTEM_NAME is: ${CMAKE_HOST_SYSTEM_NAME}")
+
+# default
+if(NOT EMBASE_CONFIG_OS)
+  if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
+    set(EMBASE_CONFIG_OS "linux")
+  elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
+    set(EMBASE_CONFIG_OS "macos")
+  elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+    set(EMBASE_CONFIG_OS "win32")
+  else()
+    set(EMBASE_CONFIG_OS "unkown")
+  endif()
+endif()
+
+message("EMBASE_CONFIG_OS is: ${EMBASE_CONFIG_OS}")
+
+if (${EMBASE_CONFIG_OS} MATCHES "unkown")
+  set(EMBASE_OS 0)
+elseif (${EMBASE_CONFIG_OS} MATCHES "linux")
+  set(EMBASE_OS 1)
+elseif (${EMBASE_CONFIG_OS} MATCHES "macos")
+  set(EMBASE_OS 2)
+elseif (${EMBASE_CONFIG_OS} MATCHES "win32")
+  set(EMBASE_OS 3)
+elseif (${EMBASE_CONFIG_OS} MATCHES "freertos")
+  set(EMBASE_OS 4)
+endif()
+
+include_directories(${EMBASE_ROOT}/include)
 
 configure_file(${EMBASE_ROOT}/include/embase_config.h.in ${EMBASE_ROOT}/include/embase_config.h)
 
-add_subdirectory(${EMBASE_ROOT}/libs/etl EXCLUDE_FROM_ALL)
+set(GIT_DIR_LOOKUP_POLICY ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
+add_subdirectory(${EMBASE_ROOT}/libs/etl etl EXCLUDE_FROM_ALL)
 
-add_subdirectory(${EMBASE_ROOT}/src EXCLUDE_FROM_ALL)
-get_directory_property(_parent PARENT_DIRECTORY)
-if(_parent)
-  set(EMBASE_TARGET_PLATFORM ${EMBASE_TARGET_PLATFORM} PARENT_SCOPE)
-endif()
+add_subdirectory(${EMBASE_ROOT}/src)
 
 if(EMBASE_EXAMPLES)
   add_subdirectory(${EMBASE_ROOT}/examples)

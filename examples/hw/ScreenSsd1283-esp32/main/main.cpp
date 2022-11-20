@@ -54,27 +54,32 @@ public:
   BOOL init()
   {
     esp_err_t ret;
-    spi_bus_config_t buscfg = {
-        .miso_io_num = PIN_NUM_MISO,
-        .mosi_io_num = PIN_NUM_MOSI,
-        .sclk_io_num = PIN_NUM_CLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = SPI_TRANS_MAX_SZ,
-    };
-    spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = 26 * 1000 * 1000,            // Clock out at 26 MHz
-        .mode = 0,                                     // SPI mode 0
-        .spics_io_num = PIN_NUM_CS,                    // CS pin
-        .queue_size = LCD_FRAME_SZ / SPI_TRANS_MAX_SZ, // We want to be able to queue 7 transactions at a time
-        .pre_cb = lcd_spi_pre_transfer_callback,       // Specify pre-transfer callback to handle D/C line
-    };
+    spi_bus_config_t buscfg;
+    memset(&buscfg, 0, sizeof(buscfg));
+    buscfg.miso_io_num = PIN_NUM_MISO;
+    buscfg.mosi_io_num = PIN_NUM_MOSI;
+    buscfg.sclk_io_num = PIN_NUM_CLK;
+    buscfg.quadwp_io_num = -1;
+    buscfg.quadhd_io_num = -1;
+    buscfg.max_transfer_sz = SPI_TRANS_MAX_SZ;
+
+    spi_device_interface_config_t devcfg;
+    memset(&devcfg, 0, sizeof(devcfg));
+    devcfg.clock_speed_hz = 26 * 1000 * 1000;            // Clock out at 26 MHz
+    devcfg.mode = 0;                                     // SPI mode 0
+    devcfg.spics_io_num = PIN_NUM_CS;                    // CS pin
+    devcfg.queue_size = LCD_FRAME_SZ / SPI_TRANS_MAX_SZ+1; // We want to be able to queue 7 transactions at a time
+    devcfg.pre_cb = lcd_spi_pre_transfer_callback;       // Specify pre-transfer callback to handle D/C line
+
     // Initialize the SPI bus
     ret = spi_bus_initialize(LCD_HOST, &buscfg, DMA_CHAN);
     ESP_ERROR_CHECK(ret);
     // Attach the LCD to the SPI bus
     ret = spi_bus_add_device(LCD_HOST, &devcfg, &spi);
     ESP_ERROR_CHECK(ret);
+
+    ///Enable backlight
+    gpio_set_level((gpio_num_t)PIN_NUM_BCKL, 0);
 
     // Initialize non-SPI GPIOs
     gpio_set_direction((gpio_num_t)PIN_NUM_DC, GPIO_MODE_OUTPUT);
@@ -93,7 +98,8 @@ public:
   void _spiWrite(int dc, const UINT8 *data, int size) override
   {
     esp_err_t ret;
-    spi_transaction_t t = {0};
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
     t.length = 8*size;
     t.tx_buffer = data;
     t.user = (void*) dc;
@@ -102,18 +108,16 @@ public:
   }
   void _spiWriteFb(const UINT8 *data, int size) override
   {
-    spi_transaction_t trans[LCD_FRAME_SZ / SPI_TRANS_MAX_SZ];
+    spi_transaction_t trans[LCD_FRAME_SZ / SPI_TRANS_MAX_SZ+1];
     int trans_num = 0;
     int cur_ofst = 0;
+    memset(&trans, 0, sizeof(trans));
     while (size > 0)
     {
       size_t cur_sz = (size > SPI_TRANS_MAX_SZ) ? SPI_TRANS_MAX_SZ : size;
-      trans[trans_num] = (spi_transaction_t){
-          .user = (void *)1,
-          .tx_buffer = &data[cur_ofst],
-          .length = cur_sz * 8,
-      };
-      // memset(&buf[cur_ofst], trans_num, cur_sz);
+      trans[trans_num].user = (void*) 1; //dc
+      trans[trans_num].tx_buffer = &data[cur_ofst];
+      trans[trans_num].length = cur_sz * 8;
       trans_num++;
       cur_ofst += cur_sz;
       size -= cur_sz;
@@ -134,39 +138,50 @@ extern "C" void app_main(void)
 {
   ESP_LOGI(TAG, "startup!!!");
 
-  g_screen.init();
+  assert(g_screen.init());
 
   size_t buflen = LCD_FRAME_SZ;
-  uint8_t *buf = heap_caps_malloc(buflen, MALLOC_CAP_DMA);
+  BYTE *buf = (BYTE *)heap_caps_malloc(buflen, MALLOC_CAP_DMA);
 
-  const Rectangle_t fullScreen(0, 0, g_screen.getSizeX() - 1, g_screen.getSizeY() - 1);
+  // todo:为什么构建函数里不成功？？
+  // const Rectangle_t fullScreen(0, 0, g_screen.getSizeX() - 1, g_screen.getSizeY() - 1);
+  Rectangle_t fullScreen;
+  fullScreen.a.v[0] = 0;
+  fullScreen.a.v[1] = 0;
+  fullScreen.b.v[0] = g_screen.getSizeX() - 1;
+  fullScreen.b.v[1] = g_screen.getSizeY() - 1;
   IBuffer_t buff(buf, buflen);
+
+  ESP_LOGI(TAG, "g_screen.getSizeX() - 1 = %d", g_screen.getSizeX() - 1);
+  ESP_LOGI(TAG, "g_screen.getSizeY() - 1 = %d", g_screen.getSizeY() - 1);
+  ESP_LOGI(TAG, "fullScreen(%d, %d, %d, %d)", fullScreen.a.v[0], fullScreen.a.v[1], fullScreen.b.v[0], fullScreen.b.v[1]);
+  ESP_LOGI(TAG, "fmt=%d", (int)g_screen.getPixelFormat());
 
   while (1)
   {
-
+    ESP_LOGI(TAG, "running");
     memset(buf, 0x00, buflen);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
 
     memset(buf, 0xff, buflen);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
 
     Screen::fillGradient(buf, g_screen.getSizeX(), g_screen.getSizeY(), g_screen.getPixelFormat(), 255, 0, 0);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
 
     Screen::fillGradient(buf, g_screen.getSizeX(), g_screen.getSizeY(), g_screen.getPixelFormat(), 0, 255, 0);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
 
     Screen::fillGradient(buf, g_screen.getSizeX(), g_screen.getSizeY(), g_screen.getPixelFormat(), 0, 0, 255);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
 
     Screen::fillGradient(buf, g_screen.getSizeX(), g_screen.getSizeY(), g_screen.getPixelFormat(), 255, 255, 255);
-    g_screen.drawRegion(fullScreen, buff);
+    assert(g_screen.drawRegion(fullScreen, buff));
     __msleep(800);
   }
 }

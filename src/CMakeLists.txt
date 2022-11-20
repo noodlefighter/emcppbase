@@ -1,47 +1,29 @@
 
-set(EMBASE_SRC
-  ${EMBASE_SRC}
-)
+file(GLOB EMBASE_SRCS ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
 
-message("CMAKE_HOST_SYSTEM_NAME is: ${CMAKE_HOST_SYSTEM_NAME}")
-
-if(NOT EMBASE_TARGET_PLATFORM)
-  if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-    set(EMBASE_TARGET_PLATFORM 1)
-    set(EMBASE_LINKS uuid)
-  elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
-    set(EMBASE_TARGET_PLATFORM 2)
-  else()
-    set(EMBASE_TARGET_PLATFORM 0)
-  endif()
-  set(EMBASE_TARGET_PLATFORM ${EMBASE_TARGET_PLATFORM} PARENT_SCOPE)
+# posix
+if((${EMBASE_CONFIG_OS} MATCHES "linux") OR (${EMBASE_CONFIG_OS} MATCHES "macos"))
+  file(GLOB POSIX_SRCS ${CMAKE_CURRENT_LIST_DIR}/platform/posix/*.cpp)
+  set(EMBASE_SRCS ${EMBASE_SRCS} ${POSIX_SRCS})
 endif()
 
-message("EMBASE_TARGET_PLATFORM is: ${EMBASE_TARGET_PLATFORM}")
+if (${EMBASE_CONFIG_OS} MATCHES "freertos")
+  file(GLOB FREERTOS_SRCS ${CMAKE_CURRENT_LIST_DIR}/platform/freertos/*.cpp)
+  set(EMBASE_SRCS ${EMBASE_SRCS} ${FREERTOS_SRCS})
+endif()
 
-
-
-if((${EMBASE_TARGET_PLATFORM} MATCHES 1) OR (${EMBASE_TARGET_PLATFORM} MATCHES 2))
-set(EMBASE_SRC
-  ${EMBASE_SRC}
-  ${CMAKE_CURRENT_LIST_DIR}/embase_thread-pthread.cpp
-)
 set(EMBASE_LINKS ${EMBASE_LINKS} etl::etl)
-endif()
 
-message("EMBASE_TARGET_LOGGER is: ${EMBASE_TARGET_LOGGER}")
-if(${EMBASE_TARGET_LOGGER} MATCHES 1)
-message("USE: EMBASE_STDOUT_LOGGER")
-# set(EMBASE_SRC
-#   ${EMBASE_SRC}
-#   ${CMAKE_CURRENT_LIST_DIR}/game_log_stdout.cpp
-# )
-endif()
 
 # if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 # target_compile_definitions(embase PRIVATE _DEBUG)
 # endif()
 
-add_library(embase ${EMBASE_SRC})
+
+file(GLOB HW_SRCS ${CMAKE_CURRENT_LIST_DIR}/hw/*.cpp)
+set(EMBASE_SRCS ${EMBASE_SRCS} ${HW_SRCS})
+
+
+add_library(embase ${EMBASE_SRCS})
 target_include_directories(embase PUBLIC ${EMBASE_ROOT}/include ${EMBASE_ROOT}/src)
 target_link_libraries(embase PUBLIC ${EMBASE_LINKS})

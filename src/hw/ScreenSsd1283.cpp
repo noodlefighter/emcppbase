@@ -1,4 +1,4 @@
-#include "ScreenSsd1283.h"
+#include "hw/ScreenSsd1283.h"
 
 #include "embase_platform.h"
 #include "embase_macros.h"
@@ -71,7 +71,7 @@ BOOL ScreenSsd1283::init(int pixelX, int pixelY)
     _reg16(0x12, 0x0609); /* power control 3 */
     _reg16(0x13, 0x3100); /* power control 4 */
 
-    return Screen::init(pixelX, pixelY, PixelFormat::RGB888);
+    return Screen::init(pixelX, pixelY, PixelFormat::RGB565_SWAP);
   } while (1);
   return FALSE;
 }
@@ -79,8 +79,8 @@ BOOL ScreenSsd1283::init(int pixelX, int pixelY)
 BOOL ScreenSsd1283::drawRegion(const Rectangle_t &region, const IBuffer_t &buff)
 {
   UINT32 x1 = region.a.v[0];
-  UINT32 x2 = region.b.v[0];
   UINT32 y1 = region.a.v[1];
+  UINT32 x2 = region.b.v[0];
   UINT32 y2 = region.b.v[1];
   if ((x1 >= _sizeX) || (x2 >= _sizeX) || (y1 >= _sizeY) || (y2 >= _sizeY))
   {
@@ -88,4 +88,5 @@ BOOL ScreenSsd1283::drawRegion(const Rectangle_t &region, const IBuffer_t &buff)
   }
   _setRegion(x1, y1, x2, y2);
   _spiWriteFb((const UINT8 *)buff.data, buff.size);
+  return TRUE;
 }
