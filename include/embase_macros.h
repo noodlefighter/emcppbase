@@ -14,3 +14,5 @@
 #define EM_BREAK_IF(cond)					                  if(cond) break
 
 #define EM_ABS(v)  (((v) < 0) ? (-(v)) : (v))
+
+#define EM_WEAK  __attribute__((weak))

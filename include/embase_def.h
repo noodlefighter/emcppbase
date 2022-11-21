@@ -4,21 +4,6 @@
 #include "embase_types.h"
 #include "etl/string.h"
 
-//todo: 记得删
-#include "esp_log.h"
-
-
-#define EMBASE_OS_UNKOWN               0
-#define EMBASE_OS_LINUX                1
-#define EMBASE_OS_MAC                  2
-#define EMBASE_OS_WIN32                3
-#define EMBASE_OS_FREERTOS             4
-
-#define EMBASE_ARCH_UNKOWN                   0
-#define EMBASE_ARCH_X86_64                   1
-#define EMBASE_ARCH_ARM                      2
-#define EMBASE_ARCH_ARM64                    3
-
 namespace embase {
 
 class Object {
@@ -53,7 +38,6 @@ struct Rectangle_t {
   Rectangle_t(UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2) {
     Point_t p1 = { {x1, y1} };
     Point_t p2 = { {x2, y2} };
-    ESP_LOGI("DEF", "%d,%d,%d,%d", x1,y1,x2,y2);
     Rectangle_t(p1, p2);
   }
 };

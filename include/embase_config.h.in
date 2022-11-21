@@ -1,5 +1,34 @@
 #pragma once
 
+#define EMBASE_OS_UNKOWN               0
+#define EMBASE_OS_LINUX                1
+#define EMBASE_OS_MAC                  2
+#define EMBASE_OS_WIN32                3
+#define EMBASE_OS_FREERTOS             4
+
+#define EMBASE_ARCH_UNKOWN                   0
+#define EMBASE_ARCH_X86_64                   1
+#define EMBASE_ARCH_ARM                      2
+#define EMBASE_ARCH_ARM64                    3
+
+#define EMBASE_LOG_LV_ERROR          0
+#define EMBASE_LOG_LV_WARN           1
+#define EMBASE_LOG_LV_INFO           2
+#define EMBASE_LOG_LV_DEBUG          3
+#define EMBASE_LOG_LV_TRACE          4
+
 #ifndef EMBASE_OBJECT_NAME_MAXSIZE
 #define EMBASE_OBJECT_NAME_MAXSIZE    16
+#endif
+
+#ifndef EMBASE_LOGGER_NAME_MAXSIZE
+#define EMBASE_LOGGER_NAME_MAXSIZE    8
+#endif
+
+#ifndef EMBASE_LOGGER_FMT_BUFFSIZE
+#define EMBASE_LOGGER_FMT_BUFFSIZE    128
+#endif
+
+#ifndef EMBASE_LOG_BUILD_TIME_LV
+#define EMBASE_LOG_BUILD_TIME_LV      EMBASE_LOG_LV_TRACE
 #endif
