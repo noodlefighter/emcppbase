@@ -23,23 +23,19 @@ struct Coord_t {
   etl::array<type_, dimension_> v;
 };
 
-struct Rectangle_t {
-  typedef Coord_t<UINT32, 2> Point_t;
-  Point_t a;
-  Point_t b;
+struct Point2D_t {
+  Point2D_t() : x(0), y(0) {}
+  Point2D_t(UINT32 x, UINT32 y) : x(x), y(y) {}
+  UINT32 x;
+  UINT32 y;
+};
 
-  Rectangle_t() {
-    a.v[0] = 0;
-    a.v[1] = 0;
-    b.v[0] = 0;
-    b.v[1] = 0;
-  }
-  Rectangle_t(Point_t p1, Point_t p2) : a(p1), b(p2) { }
-  Rectangle_t(UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2) {
-    Point_t p1 = { {x1, y1} };
-    Point_t p2 = { {x2, y2} };
-    Rectangle_t(p1, p2);
-  }
+struct Rectangle_t {
+  Rectangle_t() {}
+  Rectangle_t(Point2D_t p1, Point2D_t p2) : a(p1), b(p2) {}
+  Rectangle_t(UINT32 x1, UINT32 y1, UINT32 x2, UINT32 y2) : a(x1,y1), b(x2,y2) {}
+  Point2D_t a;
+  Point2D_t b;
 };
 
 }

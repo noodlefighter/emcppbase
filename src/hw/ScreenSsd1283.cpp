@@ -78,10 +78,10 @@ BOOL ScreenSsd1283::init(int pixelX, int pixelY)
 
 BOOL ScreenSsd1283::drawRegion(const Rectangle_t &region, const IBuffer_t &buff)
 {
-  UINT32 x1 = region.a.v[0];
-  UINT32 y1 = region.a.v[1];
-  UINT32 x2 = region.b.v[0];
-  UINT32 y2 = region.b.v[1];
+  UINT32 x1 = region.a.x;
+  UINT32 y1 = region.a.y;
+  UINT32 x2 = region.b.x;
+  UINT32 y2 = region.b.y;
   if ((x1 >= _sizeX) || (x2 >= _sizeX) || (y1 >= _sizeY) || (y2 >= _sizeY))
   {
     return FALSE;

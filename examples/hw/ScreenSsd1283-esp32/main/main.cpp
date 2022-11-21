@@ -143,19 +143,8 @@ extern "C" void app_main(void)
   size_t buflen = LCD_FRAME_SZ;
   BYTE *buf = (BYTE *)heap_caps_malloc(buflen, MALLOC_CAP_DMA);
 
-  // todo:为什么构建函数里不成功？？
-  // const Rectangle_t fullScreen(0, 0, g_screen.getSizeX() - 1, g_screen.getSizeY() - 1);
-  Rectangle_t fullScreen;
-  fullScreen.a.v[0] = 0;
-  fullScreen.a.v[1] = 0;
-  fullScreen.b.v[0] = g_screen.getSizeX() - 1;
-  fullScreen.b.v[1] = g_screen.getSizeY() - 1;
+  const Rectangle_t fullScreen(0, 0, g_screen.getSizeX() - 1, g_screen.getSizeY() - 1);
   IBuffer_t buff(buf, buflen);
-
-  ESP_LOGI(TAG, "g_screen.getSizeX() - 1 = %d", g_screen.getSizeX() - 1);
-  ESP_LOGI(TAG, "g_screen.getSizeY() - 1 = %d", g_screen.getSizeY() - 1);
-  ESP_LOGI(TAG, "fullScreen(%d, %d, %d, %d)", fullScreen.a.v[0], fullScreen.a.v[1], fullScreen.b.v[0], fullScreen.b.v[1]);
-  ESP_LOGI(TAG, "fmt=%d", (int)g_screen.getPixelFormat());
 
   while (1)
   {
