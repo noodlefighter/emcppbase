@@ -45,7 +45,11 @@ elseif (${EMBASE_CONFIG_OS} MATCHES "freertos")
   set(EMBASE_OS 4)
 endif()
 
-include_directories(${EMBASE_ROOT}/include)
+include_directories(
+  ${EMBASE_ROOT}/include
+  ${EMBASE_ROOT}/src
+  ${EMBASE_ROOT}/libs/better-enums
+)
 
 configure_file(${EMBASE_ROOT}/include/embase_config.h.in ${EMBASE_ROOT}/include/embase_config.h)
 

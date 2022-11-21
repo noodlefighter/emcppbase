@@ -74,6 +74,6 @@ private:
   static void _output(const BYTE *buff);
 };
 
-extern Logger g_default_logger;
 };
 
+extern embase::Logger g_default_logger;
