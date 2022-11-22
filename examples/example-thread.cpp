@@ -12,7 +12,7 @@ public:
     return TRUE;
   }
 
-  void run() override {
+  int run() override {
     while (1) {
       msleep(100);
       printf("run!\n");
@@ -21,6 +21,7 @@ public:
         break;
       }
     }
+    return 0;
   }
 private:
   int _cnt;

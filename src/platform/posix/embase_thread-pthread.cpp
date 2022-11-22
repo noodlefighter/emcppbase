@@ -43,21 +43,22 @@ void Thread::broadcast(){
   pthread_cond_broadcast(&_cond);
 }
 
-void Thread::run(){
+int Thread::run(){
   // C_LOG("%s","Thread::run");
+  return 0;
 }
 
 BOOL Thread::start(){
-  thread_t thread;
-  pthread_create(&thread,NULL,_thread_t<Thread,&Thread::run>,this);
+  pthread_t thread;
+  pthread_create(&thread,NULL,_pthread_t<Thread,&Thread::run>,this);
   _thread = thread;
   return TRUE;
 }
 
-int Thread::cancel(){
-  return pthread_cancel(_thread);
+BOOL Thread::cancel(){
+  return 0 == pthread_cancel(_thread);
 }
 
-void Thread::join(){
-  pthread_join(_thread, NULL);
+int Thread::join(){
+  return pthread_join(_thread, NULL);
 }

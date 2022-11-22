@@ -17,6 +17,10 @@
 #define EMBASE_LOG_LV_DEBUG          3
 #define EMBASE_LOG_LV_TRACE          4
 
+// #ifndef EMBASE_OS
+// #define EMBASE_OS EMBASE_OS_FREERTOS
+// #endif
+
 #ifndef EMBASE_OBJECT_NAME_MAXSIZE
 #define EMBASE_OBJECT_NAME_MAXSIZE    16
 #endif
