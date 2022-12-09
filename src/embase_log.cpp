@@ -6,6 +6,9 @@ using namespace embase;
 
 Logger g_default_logger("default");
 
+Logger::Logger() : Logger("", EMBASE_LOG_LV_INFO)
+{
+}
 Logger::Logger(const char *name) : Logger(name, EMBASE_LOG_LV_INFO)
 {
 }

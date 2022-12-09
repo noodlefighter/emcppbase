@@ -11,3 +11,11 @@ target_link_libraries(example-log embase)
 
 add_executable(example-enum ${CMAKE_CURRENT_LIST_DIR}/example-enum.cpp)
 target_link_libraries(example-enum embase)
+
+
+file(GLOB uart-screen-host-srcs
+  ${CMAKE_CURRENT_LIST_DIR}/uart-screen-host/*.c
+  ${CMAKE_CURRENT_LIST_DIR}/uart-screen-host/*.cpp
+)
+add_executable(uart-screen-host ${uart-screen-host-srcs})
+target_link_libraries(uart-screen-host embase)

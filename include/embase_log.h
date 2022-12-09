@@ -9,6 +9,7 @@ namespace embase {
 
 class Logger {
 public:
+  Logger();
   Logger(const char *name);
   Logger(const char *name, int lv);
 

@@ -56,3 +56,22 @@ int Screen::getPixel(PixelFormat fmt, int r, int g, int b, BYTE *buf)
     return 0;
   }
 }
+
+const Screen::PixelFormatDesc Screen::_pixFmtDescTable[(long)PixelFormat::MAX + 1] = {
+  { 0 }, // None
+  { 1, 1 }, // Mono, 1 bit per bit
+  { 1, 2 }, // Gray, 2bits
+  { 1, 4 }, // Gray, 4bits
+  { 1, 4 }, // Gray, 8bits
+  { 1, 4 }, // Gray, 16bits
+  { 0, 8, 8, 8, 16, 8, 0, 0}
+};
+
+Screen::PixelFormat Screen::pixelFormatFromDesc(PixelFormatDesc &desc)
+{
+
+}
+Screen::PixelFormatDesc& Screen::pixelFormatToDesc(PixelFormat pixFmt)
+{
+
+}
