@@ -51,12 +51,11 @@ include_directories(
   ${EMBASE_ROOT}/libs/better-enums
 )
 
-configure_file(${EMBASE_ROOT}/include/embase_config.h.in ${EMBASE_ROOT}/include/embase_config.h)
-
 set(GIT_DIR_LOOKUP_POLICY ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
 add_subdirectory(${EMBASE_ROOT}/libs/etl etl EXCLUDE_FROM_ALL)
 
-add_subdirectory(${EMBASE_ROOT}/src)
+add_subdirectory(${EMBASE_ROOT}/embase-core)
+add_subdirectory(${EMBASE_ROOT}/embase-hw)
 
 if(EMBASE_EXAMPLES)
   add_subdirectory(${EMBASE_ROOT}/examples)
