@@ -1,6 +1,4 @@
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/inc/embase_config.h.in ${CMAKE_CURRENT_LIST_DIR}/inc/embase_config.h)
-
 file(GLOB EMBASE_SRCS ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp)
 
 # posix

@@ -4,6 +4,10 @@
 
 using namespace embase;
 
+ScreenSt7525::ScreenSt7525()
+{
+}
+
 void ScreenSt7525::_transferCommand(uint8_t data)
 {
   _spiWrite(1, &data, 1);
@@ -108,3 +112,58 @@ BOOL ScreenSt7525::drawRegion(const Rectangle_t &region, const IBuffer_t &buff)
     _spiWrite(0, &_buf[page][x], w);
 	}
 }
+
+#ifdef EMBASE_HW_USE_ARDUINO
+
+#include "Arduino.h"
+
+ScreenSt7525SoftSpi::ScreenSt7525SoftSpi()
+{
+}
+
+BOOL ScreenSt7525SoftSpi::init(int pinCS, int pinDC, int pinSCK, int pinSDA, int pinRST)
+{
+	_pinCS = (uint8_t)pinCS;
+	_pinDC = (uint8_t)pinDC;
+	_pinSCK = (uint8_t)pinSCK;
+	_pinSDA = (uint8_t)pinSDA;
+	_pinRST = (uint8_t)pinRST;
+
+	pinMode(_pinCS, OUTPUT);
+	pinMode(_pinDC, OUTPUT);
+	pinMode(_pinSCK, OUTPUT);
+	pinMode(_pinSDA, OUTPUT);
+	digitalWrite(_pinCS, HIGH);
+	digitalWrite(_pinSCK, HIGH);
+	digitalWrite(_pinSDA, LOW);
+	if (0 != _pinRST) {
+		pinMode(_pinRST, OUTPUT);
+		digitalWrite(_pinRST, LOW);
+		delay(100);
+		digitalWrite(_pinRST, HIGH);
+	}
+	return ScreenSt7525::init();
+}
+
+void ScreenSt7525SoftSpi::_spiWrite(int dc, const UINT8 *data, int size)
+{
+	char i, j;
+
+	for (i = 0; i < size; i++) {
+		UINT8 d = data[i];
+
+		digitalWrite(_pinCS, LOW);
+		digitalWrite(_pinDC, HIGH);
+		for (j = 0; j < 8; j++) {
+			digitalWrite(_pinSCK, LOW);
+			if(d & 0x80)
+				digitalWrite(_pinSDA, HIGH);
+			else
+				digitalWrite(_pinSDA, LOW);
+			digitalWrite(_pinSCK, HIGH);
+			d = (d<<1);
+		}
+		digitalWrite(_pinCS, HIGH);
+	}
+}
+#endif

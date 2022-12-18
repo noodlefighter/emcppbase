@@ -1,5 +1,8 @@
 #pragma once
 
+#cmakedefine EMBASE_ARDUINO
+#cmakedefine EMBASE_HW_USE_ARDUINO
+
 #define EMBASE_OS_UNKOWN               0
 #define EMBASE_OS_LINUX                1
 #define EMBASE_OS_MAC                  2

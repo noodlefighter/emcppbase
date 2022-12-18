@@ -1,15 +1,23 @@
 cmake_minimum_required(VERSION 3.6)
 project(embase VERSION 1.0.0)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fvisibility=hidden")
+option(EMBASE_EXAMPLES "Configure CMake to build examples (or not)" OFF)
+option(EMBASE_ARDUINO "Use the arduino compatibility layer provided by Embase (or not)" ON)
+option(EMBASE_HW_USE_ARDUINO "some" ON)
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/embase-core/inc/embase_config.h.in
+  ${CMAKE_CURRENT_LIST_DIR}/embase-core/inc/embase_config.h
+  @ONLY
+)
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fvisibility=hidden")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 set(EMBASE_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
-option(EMBASE_EXAMPLES "Configure CMake to build examples (or not)" OFF)
 
 if(NOT DEFINED EMBASE_TARGET_LOGGER)
 message("Set EMBASE_TARGET_LOGGER info default[1]")
@@ -56,6 +64,9 @@ add_subdirectory(${EMBASE_ROOT}/libs/etl etl EXCLUDE_FROM_ALL)
 
 add_subdirectory(${EMBASE_ROOT}/embase-core)
 add_subdirectory(${EMBASE_ROOT}/embase-hw)
+if (EMBASE_ARDUINO)
+  add_subdirectory(${EMBASE_ROOT}/embase-arduino)
+endif()
 
 if(EMBASE_EXAMPLES)
   add_subdirectory(${EMBASE_ROOT}/examples)
