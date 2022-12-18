@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fvisibility=hidden")
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
-set(EMBASE_ROOT ${CMAKE_CURRENT_LIST_DIR})
+set(EMBASE_ROOT "${CMAKE_CURRENT_LIST_DIR}" CACHE STRING "root of embase, global var")
 
 
 if(NOT DEFINED EMBASE_TARGET_LOGGER)
@@ -28,11 +28,11 @@ message("CMAKE_HOST_SYSTEM_NAME is: ${CMAKE_HOST_SYSTEM_NAME}")
 
 # default
 if(NOT EMBASE_CONFIG_OS)
-  if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(EMBASE_CONFIG_OS "linux")
-  elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
+  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(EMBASE_CONFIG_OS "macos")
-  elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
+  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(EMBASE_CONFIG_OS "win32")
   else()
     set(EMBASE_CONFIG_OS "unkown")
