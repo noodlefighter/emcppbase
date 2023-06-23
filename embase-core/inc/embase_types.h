@@ -10,8 +10,12 @@
 namespace embase {
 
 typedef bool BOOL;
+#ifndef FALSE
 #define FALSE    0
+#endif
+#ifndef TRUE
 #define TRUE     (!FALSE)
+#endif
 
 typedef std::int8_t INT8;
 typedef std::int16_t INT16;
