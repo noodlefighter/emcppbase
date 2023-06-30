@@ -78,3 +78,9 @@ private:
 };
 
 extern embase::Logger g_default_logger;
+
+#define __emlog_error(...)   g_default_logger.error(__VA_ARGS__)
+#define __emlog_warn(...)    g_default_logger.warn(__VA_ARGS__)
+#define __emlog_info(...)    g_default_logger.info(__VA_ARGS__)
+#define __emlog_debug(...)   g_default_logger.debug(__VA_ARGS__)
+#define __emlog_trace(...)   g_default_logger.trace(__VA_ARGS__)
