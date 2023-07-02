@@ -5,16 +5,18 @@
 #include "embase_thread.h"
 #include "etl/task.h"
 #include "etl/scheduler.h"
-#include <type_traits>
+extern "C" {
+  #include "async/async.h"
+}
 
 namespace embase {
 
 class IntervalTask : public etl::task {
 public:
-  const uint32_t DEFAULT_INTERVAL = 1000;
+  static const uint32_t DEFAULT_INTERVAL = 1000;
 
-  IntervalTask(etl::task_priority_t priority)
-    : task(priority), _interval(DEFAULT_INTERVAL)
+  IntervalTask(etl::task_priority_t priority, uint32_t interval = DEFAULT_INTERVAL)
+    : task(priority), _interval(interval)
   {
   }
 
@@ -25,8 +27,6 @@ public:
     return embase::__get_sys_timestamp() - _lastStamp >= _interval;
   }
 
-  virtual void intervalRun() = 0;
-
   void task_process_work() override {
     if (embase::__get_sys_timestamp() - _lastStamp >= _interval) {
       _lastStamp = embase::__get_sys_timestamp();
@@ -34,10 +34,31 @@ public:
     }
   }
 
+protected:
+  virtual void intervalRun() = 0;
+
 private:
   uint32_t _interval;
   embase::TimeStamp_t _lastStamp;
 };
+
+class AsyncTask : public IntervalTask {
+public:
+  AsyncTask(etl::task_priority_t priority, uint32_t interval)
+    : IntervalTask(priority, interval)
+  {
+  }
+
+protected:
+  void intervalRun() override final {
+    _taskEntry(&_asyncCtx);
+  }
+
+private:
+  struct async _asyncCtx;
+  virtual async_evt _taskEntry(struct async *pt) = 0;
+};
+
 
 // note: fork from etl::scheduler
 template <typename TSchedulerPolicy, size_t MAX_TASKS_>

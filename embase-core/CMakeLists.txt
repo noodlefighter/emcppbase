@@ -25,7 +25,11 @@ set(EMBASE_LINKS ${EMBASE_LINKS} etl::etl)
 
 
 add_library(embase-core ${EMBASE_SRCS})
-target_include_directories(embase-core PUBLIC ${CMAKE_CURRENT_LIST_DIR}/inc)
+target_include_directories(embase-core PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/inc
+  ${EMBASE_ROOT}/libs/async.h
+  ${EMBASE_ROOT}/libs/better-enums
+)
 # target_include_directories(embase-core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 target_link_libraries(embase-core PUBLIC ${EMBASE_LINKS})
 

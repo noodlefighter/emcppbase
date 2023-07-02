@@ -55,9 +55,6 @@ elseif (${EMBASE_CONFIG_OS} MATCHES "freertos")
 endif()
 
 include_directories(
-  ${EMBASE_ROOT}/include
-  ${EMBASE_ROOT}/src
-  ${EMBASE_ROOT}/libs/better-enums
   ${EMBASE_ROOT}/libs/lest/include
 )
 
