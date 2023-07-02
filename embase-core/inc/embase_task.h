@@ -1,13 +1,40 @@
 #pragma once
 
+#include "embase_def.h"
+#include "embase_platform.h"
+#include "etl/task.h"
 #include "etl/scheduler.h"
 
 namespace embase {
 
-
-class Task {
+class IntervalTask : public etl::task {
 public:
-  virtual void loop();
+  const uint32_t DEFAULT_INTERVAL = 1000;
+
+  IntervalTask(etl::task_priority_t priority)
+    : task(priority), _interval(DEFAULT_INTERVAL)
+  {
+  }
+
+  void setTaskInterval(uint32_t ms) {
+    _interval = ms;
+  }
+  uint32_t task_request_work() const override {
+    return embase::__get_sys_timestamp() - _lastStamp >= _interval;
+  }
+
+  virtual void intervalRun() = 0;
+
+  void task_process_work() override {
+    if (embase::__get_sys_timestamp() - _lastStamp >= _interval) {
+      _lastStamp = embase::__get_sys_timestamp();
+      intervalRun();
+    }
+  }
+
+private:
+  uint32_t _interval;
+  embase::TimeStamp_t _lastStamp;
 };
 
 // note: fork from etl::scheduler
