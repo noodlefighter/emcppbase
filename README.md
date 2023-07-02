@@ -10,3 +10,14 @@
 - embase-core：基本类型、宏定义、容器、平台功能抽象（如Thread提供统一接口，实现是Posix Threads、FreeRTOS Threads等）
 - embase-hw：硬件设备抽象接口及驱动
 - embase-arduino：Arduino兼容层
+
+
+```
+
+构建
+$ just build
+
+执行单元测试
+$ just test
+
+```

@@ -10,6 +10,7 @@ configure_file(
   @ONLY
 )
 
+enable_testing()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fvisibility=hidden")
 
@@ -57,6 +58,7 @@ include_directories(
   ${EMBASE_ROOT}/include
   ${EMBASE_ROOT}/src
   ${EMBASE_ROOT}/libs/better-enums
+  ${EMBASE_ROOT}/libs/lest/include
 )
 
 set(GIT_DIR_LOOKUP_POLICY ALLOW_LOOKING_ABOVE_CMAKE_SOURCE_DIR)
@@ -71,7 +73,5 @@ endif()
 if(EMBASE_EXAMPLES)
   add_subdirectory(${EMBASE_ROOT}/examples)
 endif()
-
-
 
 

@@ -2,8 +2,10 @@
 
 #include "embase_def.h"
 #include "embase_platform.h"
+#include "embase_thread.h"
 #include "etl/task.h"
 #include "etl/scheduler.h"
+#include <type_traits>
 
 namespace embase {
 
@@ -100,5 +102,27 @@ private:
   typedef etl::vector<etl::task*, MAX_TASKS> task_list_t;
   task_list_t task_list;
 };
+
+template <typename Tscheduler>
+class SchedulerWithThread : public Tscheduler, private embase::Thread
+{
+public:
+  // static_assert(std::is_base_of_v<etl::scheduler, Tscheduler>, "must be child class of etl::scheduler");
+
+  bool startScheduling() {
+    return Thread::start();
+  }
+  void stopScheduling() {
+    Tscheduler::exit_scheduler();
+    Thread::join();
+  }
+
+private:
+  int run() override {
+    Tscheduler::start();
+    return 0;
+  }
+};
+
 
 }
