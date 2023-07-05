@@ -52,6 +52,7 @@ void Logger::logPrint(int lv, const char *fmt, va_list a_args)
   if (lv <= _lv) {
     offset = snprintf((char*)buffer, EMBASE_LOGGER_FMT_BUFFSIZE, "%s: ", _name.c_str());
     offset += vsnprintf((char*)buffer + offset, EMBASE_LOGGER_FMT_BUFFSIZE - offset, fmt, a_args);
+    buffer[offset++] = '\r';
     buffer[offset++] = '\n';
     buffer[offset++] = '\0';
     _output(buffer);
