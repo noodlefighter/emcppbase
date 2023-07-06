@@ -1,3 +1,6 @@
 [submodule "libs/etl"]
 	path = libs/etl
 	url = https://github.com/ETLCPP/etl.git
+[submodule "libs/lest"]
+  path = libs/lest
+  url = https://github.com/martinmoene/lest.git
