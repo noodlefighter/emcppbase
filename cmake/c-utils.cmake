@@ -4,12 +4,14 @@ function(add_map_file TARGET)
 endfunction()
 
 function(print_size_of_target TARGET)
-    add_custom_target(${TARGET}_always_display_size
-        ALL
-        COMMAND ${CMAKE_SIZE} --format=berkeley "$<TARGET_FILE:${TARGET}>"
-        COMMENT "Target Sizes: "
-        DEPENDS ${TARGET}
-    )
+    target_link_options(${TARGET} BEFORE PUBLIC -Wl,--print-memory-usage)
+
+    # add_custom_target(${TARGET}_always_display_size
+    #     ALL
+    #     COMMAND ${CMAKE_SIZE} --format=berkeley "$<TARGET_FILE:${TARGET}>"
+    #     COMMENT "Target Sizes: "
+    #     DEPENDS ${TARGET}
+    # )
 endfunction()
 
 function(generate_bin_file TARGET)
