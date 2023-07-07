@@ -1,6 +1,7 @@
 # fixme: 目前仅能在build的根目录生成map文件
 function(add_map_file TARGET)
-    target_link_options(${TARGET} PRIVATE -Wl,-Map=${TARGET}.map)
+    get_target_property(TARGET_BINARY_DIR ${TARGET} BINARY_DIR)
+    target_link_options(${TARGET} PRIVATE -Wl,-Map=${TARGET_BINARY_DIR}/${TARGET}.map)
 endfunction()
 
 function(print_size_of_target TARGET)
