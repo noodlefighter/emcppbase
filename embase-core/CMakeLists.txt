@@ -32,5 +32,6 @@ target_include_directories(embase-core PUBLIC
 )
 # target_include_directories(embase-core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 target_link_libraries(embase-core PUBLIC ${EMBASE_LINKS})
+add_library(embase::core ALIAS embase-core)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/test)

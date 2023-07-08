@@ -1,301 +1,200 @@
-/*
- * Copyright (c) 2010 by Cristian Maglie <c.maglie@arduino.cc>
- * Copyright (c) 2014 by Paul Stoffregen <paul@pjrc.com> (Transaction API)
- * SPI Master library for arduino.
- *
- * This file is free software; you can redistribute it and/or modify
- * it under the terms of either the GNU General Public License version 2
- * or the GNU Lesser General Public License version 2.1, both as
- * published by the Free Software Foundation.
- */
+#pragma once
 
-#ifndef _SPI_H_INCLUDED
-#define _SPI_H_INCLUDED
+#include <Arduino.h>
 
-#include "Arduino.h"
-#include <stdio.h>
-extern "C" {
-#include "utility/spi_com.h"
-}
-
-// SPI_HAS_TRANSACTION means SPI has
-//   - beginTransaction()
-//   - endTransaction()
-//   - usingInterrupt()
-//   - SPISetting(clock, bitOrder, dataMode)
+// SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
+// usingInterrupt(), and SPISetting(clock, bitOrder, dataMode)
 #define SPI_HAS_TRANSACTION 1
 
-// Compatibility with sketches designed for AVR @ 16 MHz could not
-// be ensured as SPI frequency depends of system clock configuration.
-// user have to use appropriate divider for the SPI clock
-// This function should not be used in new project.
-// Use SPISettings with SPI.beginTransaction() to configure SPI parameters.
-#define SPI_CLOCK_DIV2   2
-#define SPI_CLOCK_DIV4   4
-#define SPI_CLOCK_DIV8   8
-#define SPI_CLOCK_DIV16  16
-#define SPI_CLOCK_DIV32  32
-#define SPI_CLOCK_DIV64  64
-#define SPI_CLOCK_DIV128 128
+// SPI_HAS_NOTUSINGINTERRUPT means that SPI has notUsingInterrupt() method
+#define SPI_HAS_NOTUSINGINTERRUPT 1
 
-// SPI mode parameters for SPISettings
+// SPI_ATOMIC_VERSION means that SPI has atomicity fixes and what version.
+// This way when there is a bug fix you can check this define to alert users
+// of your code if it uses better version of this library.
+// This also implies everything that SPI_HAS_TRANSACTION as documented above is
+// available too.
+#define SPI_ATOMIC_VERSION 1
+
+#define SPI_CLOCK_DIV4 0x00
+#define SPI_CLOCK_DIV16 0x01
+#define SPI_CLOCK_DIV64 0x02
+#define SPI_CLOCK_DIV128 0x03
+#define SPI_CLOCK_DIV2 0x04
+#define SPI_CLOCK_DIV8 0x05
+#define SPI_CLOCK_DIV32 0x06
+
 #define SPI_MODE0 0x00
-#define SPI_MODE1 0x01
-#define SPI_MODE2 0x02
-#define SPI_MODE3 0x03
+#define SPI_MODE1 0x04
+#define SPI_MODE2 0x08
+#define SPI_MODE3 0x0C
 
-#define SPI_TRANSMITRECEIVE 0x0
-#define SPI_TRANSMITONLY 0x1
+#define SPI_MODE_MASK 0x0C  // CPOL = bit 3, CPHA = bit 2 on SPCR
+#define SPI_CLOCK_MASK 0x03  // SPR1 = bit 1, SPR0 = bit 0 on SPCR
+#define SPI_2XCLOCK_MASK 0x01  // SPI2X = bit 0 on SPSR
 
-// Transfer mode
-enum SPITransferMode {
-  SPI_CONTINUE, /* Transfer not finished: CS pin kept active */
-  SPI_LAST      /* Transfer ended: CS pin released */
-};
-
-// Indicates the user controls himself the CS pin outside of the spi class
-#define CS_PIN_CONTROLLED_BY_USER  NUM_DIGITAL_PINS
-
-// Indicates there is no configuration selected
-#define NO_CONFIG   ((int16_t)(-1))
-
-// Defines a default timeout delay in milliseconds for the SPI transfer
-#ifndef SPI_TRANSFER_TIMEOUT
-  #define SPI_TRANSFER_TIMEOUT 1000
-#endif
-
-/*
- * Defines the number of settings saved per SPI instance. Must be in range 1 to 254.
- * Can be redefined in variant.h
- */
-#ifndef NB_SPI_SETTINGS
-  #define NB_SPI_SETTINGS 4
+// define SPI_AVR_EIMSK for AVR boards with external interrupt pins
+#if defined(EIMSK)
+  #define SPI_AVR_EIMSK  EIMSK
+#elif defined(GICR)
+  #define SPI_AVR_EIMSK  GICR
+#elif defined(GIMSK)
+  #define SPI_AVR_EIMSK  GIMSK
 #endif
 
 class SPISettings {
-  public:
-    SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode, bool noRecv = SPI_TRANSMITRECEIVE)
-    {
-      clk = clock;
-      bOrder = bitOrder;
-      noReceive = noRecv;
+public:
+    SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) {
+        if (__builtin_constant_p(clock)) {
+            init_AlwaysInline(clock, bitOrder, dataMode);
+        } else {
+            init_MightInline(clock, bitOrder, dataMode);
+        }
+    }
+    SPISettings() {
+        init_AlwaysInline(4000000, MSBFIRST, SPI_MODE0);
+    }
+private:
+    void init_MightInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) {
+        init_AlwaysInline(clock, bitOrder, dataMode);
+    }
+    void init_AlwaysInline(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
+    __attribute__((__always_inline__)) {
+        // Clock settings are defined as follows. Note that this shows SPI2X
+        // inverted, so the bits form increasing numbers. Also note that
+        // fosc/64 appears twice
+        // SPR1 SPR0 ~SPI2X Freq
+        //   0    0     0   fosc/2
+        //   0    0     1   fosc/4
+        //   0    1     0   fosc/8
+        //   0    1     1   fosc/16
+        //   1    0     0   fosc/32
+        //   1    0     1   fosc/64
+        //   1    1     0   fosc/64
+        //   1    1     1   fosc/128
 
-      if (SPI_MODE0 == dataMode) {
-        dMode = SPI_MODE_0;
-      } else if (SPI_MODE1 == dataMode) {
-        dMode = SPI_MODE_1;
-      } else if (SPI_MODE2 == dataMode) {
-        dMode = SPI_MODE_2;
-      } else if (SPI_MODE3 == dataMode) {
-        dMode = SPI_MODE_3;
-      }
+        // We find the fastest clock that is less than or equal to the
+        // given clock rate. The clock divider that results in clock_setting
+        // is 2 ^^ (clock_div + 1). If nothing is slow enough, we'll use the
+        // slowest (128 == 2 ^^ 7, so clock_div = 6).
+        // uint8_t clockDiv;
+
+        // When the clock is known at compiletime, use this if-then-else
+        // cascade, which the compiler knows how to completely optimize
+        // away. When clock is not known, use a loop instead, which generates
+        // shorter code.
+
+        // if (__builtin_constant_p(clock)) {
+        //   if (clock >= F_CPU / 2) {
+        //     clockDiv = 0;
+        //   } else if (clock >= F_CPU / 4) {
+        //     clockDiv = 1;
+        //   } else if (clock >= F_CPU / 8) {
+        //     clockDiv = 2;
+        //   } else if (clock >= F_CPU / 16) {
+        //     clockDiv = 3;
+        //   } else if (clock >= F_CPU / 32) {
+        //     clockDiv = 4;
+        //   } else if (clock >= F_CPU / 64) {
+        //     clockDiv = 5;
+        //   } else {
+        //     clockDiv = 6;
+        //   }
+        // } else {
+        //   uint32_t clockSetting = F_CPU / 2;
+        //   clockDiv = 0;
+        //   while (clockDiv < 6 && clock < clockSetting) {
+        //     clockSetting /= 2;
+        //     clockDiv++;
+        //   }
+        // }
+
+        // Compensate for the duplicate fosc/64
+        // if (clockDiv == 6)
+        // clockDiv = 7;
+
+        // Invert the SPI2X bit
+        // clockDiv ^= 0x1;
+
+        // Pack into the SPISettings class
+        // spcr = _BV(SPE) | _BV(MSTR) | ((bitOrder == LSBFIRST) ? _BV(DORD) : 0) |
+        //   (dataMode & SPI_MODE_MASK) | ((clockDiv >> 1) & SPI_CLOCK_MASK);
+
+        // spsr = clockDiv & SPI_2XCLOCK_MASK;
     }
-    SPISettings()
-    {
-      pinCS = -1;
-      clk = SPI_SPEED_CLOCK_DEFAULT;
-      bOrder = MSBFIRST;
-      dMode = SPI_MODE_0;
-    }
-  private:
-    int16_t pinCS;      //CS pin associated to the configuration
-    uint32_t clk;       //specifies the spi bus maximum clock speed
-    BitOrder bOrder;    //bit order (MSBFirst or LSBFirst)
-    spi_mode_e dMode;   //one of the data mode
-    //Mode          Clock Polarity (CPOL)   Clock Phase (CPHA)
-    //SPI_MODE0             0                     0
-    //SPI_MODE1             0                     1
-    //SPI_MODE2             1                     0
-    //SPI_MODE3             1                     1
+    uint8_t spcr;
+    uint8_t spsr;
     friend class SPIClass;
-    bool noReceive;
 };
 
 class SPIClass {
-  public:
-    SPIClass();
-    SPIClass(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t ssel = (uint8_t)NC);
+public:
+    void init(uint8_t spi_mode,uint8_t ss,uint8_t sck,uint8_t mosi,uint8_t miso);
+    // Initialize the SPI library
+    void begin();
+    // static void begin(uint32_t mode,uint16_t cs);
+    static void setClockSpeed(uint32_t clock,uint32_t hz);
 
-    // setMISO/MOSI/SCLK/SSEL have to be called before begin()
-    void setMISO(uint32_t miso)
-    {
-      _spi.pin_miso = digitalPinToPinName(miso);
-    };
-    void setMOSI(uint32_t mosi)
-    {
-      _spi.pin_mosi = digitalPinToPinName(mosi);
-    };
-    void setSCLK(uint32_t sclk)
-    {
-      _spi.pin_sclk = digitalPinToPinName(sclk);
-    };
-    void setSSEL(uint32_t ssel)
-    {
-      _spi.pin_ssel = digitalPinToPinName(ssel);
-    };
+    // If SPI is used from within an interrupt, this function registers
+    // that interrupt with the SPI library, so beginTransaction() can
+    // prevent conflicts.  The input interruptNumber is the number used
+    // with attachInterrupt.  If SPI is used from a different interrupt
+    // (eg, a timer), interruptNumber should be 255.
+    static void usingInterrupt(uint8_t interruptNumber);
+    // And this does the opposite.
+    static void notUsingInterrupt(uint8_t interruptNumber);
+    // Note: the usingInterrupt and notUsingInterrupt functions should
+    // not to be called from ISR context or inside a transaction.
+    // For details see:
+    // https://github.com/arduino/Arduino/pull/2381
+    // https://github.com/arduino/Arduino/pull/2449
 
-    void setMISO(PinName miso)
-    {
-      _spi.pin_miso = (miso);
-    };
-    void setMOSI(PinName mosi)
-    {
-      _spi.pin_mosi = (mosi);
-    };
-    void setSCLK(PinName sclk)
-    {
-      _spi.pin_sclk = (sclk);
-    };
-    void setSSEL(PinName ssel)
-    {
-      _spi.pin_ssel = (ssel);
-    };
+    // Before using SPI.transfer() or asserting chip select pins,
+    // this function is used to gain exclusive access to the SPI bus
+    // and configure the correct settings.
+    static void beginTransaction(SPISettings settings);
 
-    void begin(uint8_t _pin = CS_PIN_CONTROLLED_BY_USER);
-    void end(void);
+    // Write to the SPI bus (MOSI pin) and also receive (MISO pin)
+    uint8_t transfer(uint8_t data);
 
-    /* This function should be used to configure the SPI instance in case you
-     * don't use default parameters.
-     * You can attach another CS pin to the SPI instance and each CS pin can be
-     * attach with specific SPI settings.
-     */
-    void beginTransaction(uint8_t pin, SPISettings settings);
-    void beginTransaction(SPISettings settings)
-    {
-      beginTransaction(CS_PIN_CONTROLLED_BY_USER, settings);
-    }
+    uint16_t transfer16(uint16_t data);
 
-    void endTransaction(uint8_t pin);
-    void endTransaction(void)
-    {
-      endTransaction(CS_PIN_CONTROLLED_BY_USER);
-    }
+    void transfer(const void *buf, size_t count);
 
-    /* Transfer functions: must be called after initialization of the SPI
-     * instance with begin() or beginTransaction().
-     * You can specify the CS pin to use.
-     */
-    byte transfer(uint8_t pin, uint8_t _data, SPITransferMode _mode = SPI_LAST);
-    uint16_t transfer16(uint8_t pin, uint16_t _data, SPITransferMode _mode = SPI_LAST);
-    void transfer(uint8_t pin, void *_buf, size_t _count, SPITransferMode _mode = SPI_LAST);
-    void transfer(byte _pin, void *_bufout, void *_bufin, size_t _count, SPITransferMode _mode = SPI_LAST);
+    // After performing a group of transfers and releasing the chip select
+    // signal, this function allows others to access the SPI bus
+    static void endTransaction(void);
 
-    // Transfer functions when user controls himself the CS pin.
-    byte transfer(uint8_t _data, SPITransferMode _mode = SPI_LAST)
-    {
-      return transfer(CS_PIN_CONTROLLED_BY_USER, _data, _mode);
-    }
+    // Disable the SPI bus
+    void end();
 
-    uint16_t transfer16(uint16_t _data, SPITransferMode _mode = SPI_LAST)
-    {
-      return transfer16(CS_PIN_CONTROLLED_BY_USER, _data, _mode);
-    }
+    // This function is deprecated.  New applications should use
+    // beginTransaction() to configure SPI settings.
+    static void setBitOrder(uint8_t bitOrder);
 
-    void transfer(void *_buf, size_t _count, SPITransferMode _mode = SPI_LAST)
-    {
-      transfer(CS_PIN_CONTROLLED_BY_USER, _buf, _count, _mode);
-    }
+    // This function is deprecated.  New applications should use
+    // beginTransaction() to configure SPI settings.
+    static void setDataMode(uint8_t dataMode);
 
-    void transfer(void *_bufout, void *_bufin, size_t _count, SPITransferMode _mode = SPI_LAST)
-    {
-      transfer(CS_PIN_CONTROLLED_BY_USER, _bufout, _bufin, _count, _mode);
-    }
+    // This function is deprecated.  New applications should use
+    // beginTransaction() to configure SPI settings.
+    static void setClockDivider(uint8_t clockDiv);
 
-    /* These methods are deprecated and kept for compatibility.
-     * Use SPISettings with SPI.beginTransaction() to configure SPI parameters.
-     */
-    void setBitOrder(uint8_t _pin, BitOrder);
-    void setBitOrder(BitOrder _order)
-    {
-      setBitOrder(CS_PIN_CONTROLLED_BY_USER, _order);
-    }
+    // These undocumented functions should not be used.  SPI.transfer()
+    // polls the hardware flag which is automatically cleared as the
+    // AVR responds to SPI's interrupt
+    static void attachInterrupt();
+    static void detachInterrupt();
 
-    void setDataMode(uint8_t _pin, uint8_t);
-    void setDataMode(uint8_t _mode)
-    {
-      setDataMode(CS_PIN_CONTROLLED_BY_USER, _mode);
-    }
+    uint8_t spi_mode();
+private:
+    uint8_t initialized;
 
-    void setClockDivider(uint8_t _pin, uint8_t);
-    void setClockDivider(uint8_t _div)
-    {
-      setClockDivider(CS_PIN_CONTROLLED_BY_USER, _div);
-    }
-
-    // Not implemented functions. Kept for backward compatibility.
-    void usingInterrupt(uint8_t interruptNumber);
-    void attachInterrupt(void);
-    void detachInterrupt(void);
-
-  private:
-    /* Contains various spiSettings for the same spi instance. Each spi spiSettings
-    is associated to a CS pin. */
-    SPISettings   spiSettings[NB_SPI_SETTINGS];
-
-    // Use to know which configuration is selected.
-    int16_t       _CSPinConfig;
-
-    // spi instance
-    spi_t         _spi;
-
-
-    typedef enum {
-      GET_IDX = 0,
-      ADD_NEW_PIN = 1
-    } pin_option_t;
-
-    uint8_t pinIdx(uint8_t _pin, pin_option_t option)
-    {
-      uint8_t i;
-
-      if ((_pin > NUM_DIGITAL_PINS) && (!digitalPinIsValid(_pin))) {
-        return NB_SPI_SETTINGS;
-      }
-
-      for (i = 0; i < NB_SPI_SETTINGS; i++) {
-        if (_pin == spiSettings[i].pinCS) {
-          return i;
-        }
-      }
-
-      if (option == ADD_NEW_PIN) {
-        for (i = 0; i < NB_SPI_SETTINGS; i++) {
-          if (spiSettings[i].pinCS == -1) {
-            spiSettings[i].pinCS = _pin;
-            return i;
-          }
-        }
-      }
-      return i;
-    }
-
-    void RemovePin(uint8_t _pin)
-    {
-      if ((_pin > NUM_DIGITAL_PINS) && (!digitalPinIsValid(_pin))) {
-        return;
-      }
-
-      for (uint8_t i = 0; i < NB_SPI_SETTINGS; i++) {
-        if (spiSettings[i].pinCS == _pin) {
-          spiSettings[i].pinCS = -1;
-          spiSettings[i].clk = SPI_SPEED_CLOCK_DEFAULT;
-          spiSettings[i].bOrder = MSBFIRST;
-          spiSettings[i].dMode = SPI_MODE_0;
-        }
-      }
-    }
-
-    void RemoveAllPin(void)
-    {
-      for (uint8_t i = 0; i < NB_SPI_SETTINGS; i++) {
-        spiSettings[i].pinCS = -1;
-        spiSettings[i].clk = SPI_SPEED_CLOCK_DEFAULT;
-        spiSettings[i].bOrder = MSBFIRST;
-        spiSettings[i].dMode = SPI_MODE_0;
-      }
-    }
+    uint8_t _spi_mode;   //sw_spi0 hw_spi1 hw_spi2
+    uint8_t _ss;
+    uint8_t _sck;
+    uint8_t _mosi;
+    uint8_t _miso;
 };
 
 extern SPIClass SPI;
-
-#endif

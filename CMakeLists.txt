@@ -64,6 +64,7 @@ add_subdirectory(${EMBASE_ROOT}/libs/etl etl EXCLUDE_FROM_ALL)
 add_subdirectory(${EMBASE_ROOT}/embase-core)
 add_subdirectory(${EMBASE_ROOT}/embase-hw)
 if (EMBASE_ARDUINO)
+  message("EMBASE_ARDUINO: ON")
   add_subdirectory(${EMBASE_ROOT}/embase-arduino)
 endif()
 
