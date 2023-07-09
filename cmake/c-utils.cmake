@@ -20,7 +20,6 @@ function(generate_bin_file TARGET)
         COMMAND ${CMAKE_OBJCOPY} -Oihex "$<TARGET_FILE:${TARGET}>" "${TARGET}.hex"
         COMMAND ${CMAKE_OBJCOPY} -Obinary "$<TARGET_FILE:${TARGET}>" "${TARGET}.bin"
         COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble "$<TARGET_FILE:${TARGET}>" > "${TARGET}.lst"
-        COMMENT "Generate Binary File: "
         DEPENDS ${TARGET}
     )
 endfunction()

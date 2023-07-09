@@ -11,7 +11,8 @@
 #endif
 
 #define EM_GOTO_IF(cond,too)                        if(cond) goto too;
-#define EM_BREAK_IF(cond)					                  if(cond) break
+#define EM_BREAK_IF(cond)                           if(cond) break
+
 
 #define EM_ABS(v)  (((v) < 0) ? (-(v)) : (v))
 
