@@ -1,21 +1,13 @@
 // base types
 #pragma once
 
-#include <cstdint>
+#ifdef __cplusplus // C++ only
 
-#ifndef INTERFACES
-#define INTERFACES struct
-#endif
+#include <cstdint>
 
 namespace embase {
 
 typedef bool BOOL;
-#ifndef FALSE
-#define FALSE    0
-#endif
-#ifndef TRUE
-#define TRUE     (!FALSE)
-#endif
 
 typedef std::int8_t INT8;
 typedef std::int16_t INT16;
@@ -32,3 +24,20 @@ typedef float FLOAT;
 
 typedef unsigned int mseconds_t;
 }
+
+#else // C only
+
+#include <stdint.h>
+
+#endif // __cplusplus
+
+#ifndef FALSE
+#define FALSE    0
+#endif
+#ifndef TRUE
+#define TRUE     (!FALSE)
+#endif
+
+#ifndef INTERFACES
+#define INTERFACES struct
+#endif

@@ -2,6 +2,8 @@
 
 #include "embase_config.h"
 #include "embase_types.h"
+
+#ifdef __cplusplus // C++ only
 #include "etl/string.h"
 
 namespace embase {
@@ -38,5 +40,7 @@ struct Rectangle_t {
   Point2D_t b;
 };
 
-}
+} // namespace embase
+
+#endif // __cplusplus
 
