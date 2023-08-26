@@ -106,6 +106,12 @@
 // #define min(a, b) (((a) < (b)) ? (a) : (b))
 // #endif
 
+#ifdef PIN_NC
+    #undef PIN_NC
+    #warning override PIN_NC!!
+#endif
+#define PIN_NC 255
+
 typedef bool boolean;
 
 typedef enum WiringPinMode {
