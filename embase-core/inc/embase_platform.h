@@ -6,12 +6,14 @@
 
 namespace embase {
 
-typedef UINT32 TimeStamp_t;
+typedef UINT32 TimeMs_t;
+typedef UINT32 TimeUs_t;
 
 void __msleep(UINT32 v);
 void __usleep(UINT32 v);
 
-TimeStamp_t __get_sys_timestamp();
+TimeMs_t __get_systick_ms();
+TimeUs_t __get_systick_us();
 
 };
 
