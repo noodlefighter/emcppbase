@@ -24,12 +24,12 @@ public:
     _interval = ms;
   }
   uint32_t task_request_work() const override {
-    return embase::__get_sys_timestamp() - _lastStamp >= _interval;
+    return embase::__get_systick_ms() - _lastStamp >= _interval;
   }
 
   void task_process_work() override {
-    if (embase::__get_sys_timestamp() - _lastStamp >= _interval) {
-      _lastStamp = embase::__get_sys_timestamp();
+    if (embase::__get_systick_ms() - _lastStamp >= _interval) {
+      _lastStamp = embase::__get_systick_ms();
       intervalRun();
     }
   }
@@ -39,7 +39,7 @@ protected:
 
 private:
   uint32_t _interval;
-  embase::TimeStamp_t _lastStamp;
+  embase::TimeMs_t _lastStamp;
 };
 
 class AsyncTask : public IntervalTask {

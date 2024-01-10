@@ -129,7 +129,7 @@ typedef enum WiringPinMode {
 extern "C" {
 
 // note: 需要用户在板级实现
-void pinMode(uint8_t pin, WiringPinMode mode);
+void pinMode(uint8_t pin, uint8_t mode);
 void digitalWrite(uint8_t pin, uint8_t val);
 int digitalRead(uint8_t pin);
 
@@ -144,3 +144,5 @@ void delayMicroseconds(unsigned int us);
 #include <atomic.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "Stream.h"

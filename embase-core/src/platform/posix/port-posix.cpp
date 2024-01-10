@@ -2,11 +2,11 @@
 
 namespace embase {
 
-TimeStamp_t __get_sys_timestamp()
+TimeMs_t __get_systick_ms()
 {
   struct timespec times = {0, 0};
   clock_gettime(CLOCK_MONOTONIC, &times);
-  return (TimeStamp_t)times.tv_sec*1e3 + (TimeStamp_t)times.tv_nsec/1e6;
+  return (TimeMs_t)times.tv_sec*1e3 + (TimeMs_t)times.tv_nsec/1e6;
 }
 
 }
