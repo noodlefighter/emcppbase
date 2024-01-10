@@ -61,5 +61,5 @@ void Logger::logPrint(int lv, const char *fmt, va_list a_args)
 
 EM_WEAK void Logger::_output(const BYTE *buff)
 {
-  printf((const char*)buff);
+  printf("%s", (const char*)buff);
 }
