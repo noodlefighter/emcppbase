@@ -26,10 +26,14 @@ public:
 	uint32_t writeAvailable() const {
 		return _capacity - _bytes;
 	}
-	uint32_t write(const uint8_t *data, uint32_t size);
 
-	uint32_t peek(uint8_t *data, uint32_t size) const; // 支持回环的peek
-	uint32_t peekConsequent(uint8_t *data, uint32_t size) const; // 非回环peek
+	// 写入数据
+	uint32_t write(const uint8_t *data, uint32_t size);
+	// 读出数据
+	uint32_t read(uint8_t *data, uint32_t size);
+
+	// 另一种读出数据的方法，但不支持回环读，即不一定能一次读出readAvailable()个字节，读之后需要release()释放
+	uint32_t peekConsequent(uint8_t *data, uint32_t size) const;
 	uint32_t release(uint32_t size);
 
 private:
@@ -73,7 +77,7 @@ uint32_t ByteBuffer<MAX_SIZE_>::write(const uint8_t *data, uint32_t size)
 }
 
 template <std::size_t MAX_SIZE_>
-inline uint32_t ByteBuffer<MAX_SIZE_>::peek(uint8_t *data, uint32_t size) const
+inline uint32_t ByteBuffer<MAX_SIZE_>::read(uint8_t *data, uint32_t size)
 {
 	uint32_t n = 0;
 
@@ -81,11 +85,14 @@ inline uint32_t ByteBuffer<MAX_SIZE_>::peek(uint8_t *data, uint32_t size) const
 	size = (readAvailable() < size) ? readAvailable() : size;
 	// 先读出一次，如果完整则直接返回，不完整则再读一次
 	n = peekConsequent(data, size);
+	release(n);
 	if (n != size) {
-		n += peekConsequent(data + n, size - n);
-		EM_ASSERT(n == size, "");
+		int n2 = peekConsequent(data + n, size - n);
+		release(n2);
+		n += n2;
 	}
-	return size;
+	EM_ASSERT(n == size, "");
+	return n;
 }
 
 template <std::size_t MAX_SIZE_>
