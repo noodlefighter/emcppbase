@@ -43,6 +43,15 @@ const lest::test specification[] =
     buffer.release(4);
     EXPECT(buffer.readAvailable() == 0);
     EXPECT(buffer.writeAvailable() == BUFSIZE);
+
+    // 6. 写6字节，回环写，即尾部4+头部2
+    EXPECT(buffer.write(testdata_0, 6) == 6);
+    EXPECT(buffer.readAvailable() == 6);
+
+    // 7. 回环读
+    EXPECT(buffer.peek(buf, sizeof(buf)) == 6);
+    buffer.release(6);
+    EXPECT(buffer.readAvailable() == 0);
   },
 
 };
