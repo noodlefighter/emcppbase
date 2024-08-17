@@ -1,4 +1,5 @@
 #include "embase_types.h"
+#include "etl/string.h"
 #include <string>
 #include <stddef.h>
 
@@ -14,5 +15,10 @@ void __bcd_bytes_to_num(UINT8 *dest, const UINT8 *src, int size); // example: UI
 int __mjd_to_day(int mjd);
 int __mjd_to_month(int mjd);
 int __mjd_to_year(int mjd);
+
+// 数据转十六进制字符串
+// space 每个数据间的空格个数
+// col 几个数据换一次行，为0不换行
+bool __bytes_to_hex_string(const embase::BYTE *bytes, size_t size, int space, int col, etl::istring &out);
 
 }

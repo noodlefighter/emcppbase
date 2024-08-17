@@ -64,3 +64,38 @@ int __mjd_to_year(int mjd)
     k = 1;
   return (y1 + k);
 }
+
+bool embase::__bytes_to_hex_string(const embase::BYTE *bytes,
+                                   size_t size,
+                                   int space,
+                                   int col,
+                                   etl::istring &out)
+{
+  // 计算输出长度
+  size_t total_col = size / col;
+  size_t total_size = size * 2 + total_col + space * (size - total_col);
+  if (total_size > out.max_size()) {
+    return false;
+  }
+
+  int col_count = 0;
+  out.clear();
+  for (size_t i = 0; i < size; ++i) {
+    char tmp[3] = {0};
+    sprintf(tmp, "%02X", bytes[i]);
+    out.append(tmp);
+
+    col_count++;
+    if (col_count != col) {
+      int space_count = space;
+      while (space_count-- > 0) {
+        out.append(" ");
+      }
+    } else {
+      col_count = 0;
+      out.append("\n");
+    }
+  }
+
+  return true;
+}
