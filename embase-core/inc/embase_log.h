@@ -4,6 +4,7 @@
 #include "embase_def.h"
 #include "etl/string.h"
 #include <stdarg.h>
+#include <stdlib.h>
 
 namespace embase {
 
@@ -21,6 +22,15 @@ public:
 
   void logPrint(int lv, const char *fmt, ...);
   void logPrint(int lv, const char *fmt, va_list a_args);
+
+  void fatal(const char *fmt, ...) {
+  #if EMBASE_LOG_LV_FATAL <= EMBASE_LOG_BUILD_TIME_LV
+    va_list args;
+    va_start(args, fmt);
+    logPrint(EMBASE_LOG_LV_FATAL, fmt, args);
+    va_end(args);
+  #endif
+  }
 
   void error(const char *fmt, ...) {
   #if EMBASE_LOG_LV_ERROR <= EMBASE_LOG_BUILD_TIME_LV
@@ -79,8 +89,11 @@ private:
 
 extern embase::Logger g_default_logger;
 
+#define __emlog_fatal(...)   g_default_logger.fatal(__VA_ARGS__)
 #define __emlog_error(...)   g_default_logger.error(__VA_ARGS__)
 #define __emlog_warn(...)    g_default_logger.warn(__VA_ARGS__)
 #define __emlog_info(...)    g_default_logger.info(__VA_ARGS__)
 #define __emlog_debug(...)   g_default_logger.debug(__VA_ARGS__)
 #define __emlog_trace(...)   g_default_logger.trace(__VA_ARGS__)
+
+#define __em_assert(cond, msg) if(!(cond)){__emlog_fatal("Assert failed: %s", msg); ::abort();}
