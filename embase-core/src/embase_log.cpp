@@ -47,11 +47,18 @@ void Logger::logPrint(int lv, const char *fmt, ...)
 void Logger::logPrint(int lv, const char *fmt, va_list a_args)
 {
   ssize_t offset;
-  BYTE buffer[EMBASE_LOGGER_FMT_BUFFSIZE+3];
+  BYTE buffer[EMBASE_LOGGER_FMT_BUFFSIZE];
 
   if (lv <= _lv) {
-    offset = snprintf((char*)buffer, EMBASE_LOGGER_FMT_BUFFSIZE, "%s: ", _name.c_str());
-    offset += vsnprintf((char*)buffer + offset, EMBASE_LOGGER_FMT_BUFFSIZE - offset, fmt, a_args);
+    // header
+    offset = snprintf((char*)buffer, sizeof(buffer), "%s: ", _name.c_str());
+
+    // body
+    int body_maxlen = sizeof(buffer) - offset - 2;
+    int body_len = vsnprintf((char*)buffer + offset, body_maxlen, fmt, a_args);
+    offset += (body_len > body_maxlen) ? body_maxlen : body_len;
+
+    // end: CRLF, 2 bytes
     buffer[offset++] = '\r';
     buffer[offset++] = '\n';
     buffer[offset++] = '\0';
