@@ -1,8 +1,5 @@
 #pragma once
 
-#cmakedefine EMBASE_ARDUINO
-#cmakedefine EMBASE_HW_USE_ARDUINO
-
 #define EMBASE_OS_UNKOWN               0
 #define EMBASE_OS_LINUX                1
 #define EMBASE_OS_MAC                  2
@@ -21,22 +18,14 @@
 #define EMBASE_LOG_LV_DEBUG          4
 #define EMBASE_LOG_LV_TRACE          5
 
-// #ifndef EMBASE_OS
-// #define EMBASE_OS EMBASE_OS_FREERTOS
-// #endif
+// cmake options
+#cmakedefine EMBASE_OS
+#cmakedefine EMBASE_ARDUINO
+#cmakedefine EMBASE_HW_USE_ARDUINO
 
-#ifndef EMBASE_OBJECT_NAME_MAXSIZE
-#define EMBASE_OBJECT_NAME_MAXSIZE    16
-#endif
+// cmake vars
+#cmakedefine EMBASE_OBJECT_NAME_MAXSIZE   @EMBASE_OBJECT_NAME_MAXSIZE@
+#cmakedefine EMBASE_LOGGER_NAME_MAXSIZE   @EMBASE_LOGGER_NAME_MAXSIZE@
+#cmakedefine EMBASE_LOGGER_FMT_BUFFSIZE   @EMBASE_LOGGER_FMT_BUFFSIZE@
+#cmakedefine EMBASE_LOG_BUILD_TIME_LV     @EMBASE_LOG_BUILD_TIME_LV@
 
-#ifndef EMBASE_LOGGER_NAME_MAXSIZE
-#define EMBASE_LOGGER_NAME_MAXSIZE    16
-#endif
-
-#ifndef EMBASE_LOGGER_FMT_BUFFSIZE
-#define EMBASE_LOGGER_FMT_BUFFSIZE    128
-#endif
-
-#ifndef EMBASE_LOG_BUILD_TIME_LV
-#define EMBASE_LOG_BUILD_TIME_LV      EMBASE_LOG_LV_TRACE
-#endif

@@ -4,6 +4,23 @@ project(embase VERSION 1.0.0)
 option(EMBASE_EXAMPLES "Configure CMake to build examples (or not)" OFF)
 option(EMBASE_ARDUINO "Use the arduino compatibility layer provided by Embase (or not)" ON)
 option(EMBASE_HW_USE_ARDUINO "some" ON)
+
+if(NOT EXISTS EMBASE_OBJECT_NAME_MAXSIZE)
+  set(EMBASE_OBJECT_NAME_MAXSIZE 16)
+endif()
+
+if(NOT EXISTS EMBASE_LOGGER_NAME_MAXSIZE)
+  set(EMBASE_LOGGER_NAME_MAXSIZE 16)
+endif()
+
+if (NOT DEFINED EMBASE_LOGGER_FMT_BUFFSIZE)
+  set(EMBASE_LOGGER_FMT_BUFFSIZE 128)
+endif()
+
+if(NOT EXISTS EMBASE_LOG_BUILD_TIME_LV)
+  set(EMBASE_LOG_BUILD_TIME_LV 5)
+endif()
+
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/embase-core/inc/embase_config.h.in
   ${CMAKE_CURRENT_LIST_DIR}/embase-core/inc/embase_config.h
